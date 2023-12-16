@@ -1,0 +1,46 @@
+:root {
+  /* fonts */
+  --text: 400 14px/24px 'Inter Regular', Roboto, Helvetica, Arial, sans-serif;
+  --position-company: 500 14px/24px 'Inter Medium', Roboto, Helvetica, Arial, sans-serif;
+  --opportunities: 800 16px/24px 'Inter Extra Bold', Roboto, Helvetica, Arial, sans-serif;
+  --buttons: 500 16px/24px 'Inter Medium', Roboto, Helvetica, Arial, sans-serif;
+  --links-forms: 400 16px/24px 'Inter Regular', Roboto, Helvetica, Arial, sans-serif;
+  --text-links: 400 14px/24px 'Inter Regular', Roboto, Helvetica, Arial, sans-serif;
+  --additional-links: 600 16px/24px 'Inter Semi Bold', Roboto, Helvetica, Arial, sans-serif;
+  --footer: 400 12px/20px 'Inter Regular', Roboto, Helvetica, Arial, sans-serif;
+  --headers-main-mobile: 800 28px/36px 'Inter Extra Bold', Roboto, Helvetica, Arial, sans-serif;
+  --headers-main-desktop: 800 56px/64px 'Inter Extra Bold', Roboto, Helvetica, Arial, sans-serif;
+  --headers-secondary-mobile: 800 28px/36px 'Inter Extra Bold', Roboto, Helvetica, Arial, sans-serif;
+  --headers-secondary-desktop: 800 40px/48px 'Inter Extra Bold', Roboto, Helvetica, Arial, sans-serif;
+  --headers-third-mobile: 600 20px/28px 'Inter Semi Bold', Roboto, Helvetica, Arial, sans-serif;
+  --headers-third-desktop: 600 20px/28px 'Inter Semi Bold', Roboto, Helvetica, Arial, sans-serif;
+  --headers-fourth-mobile: 600 16px/24px 'Inter Semi Bold', Roboto, Helvetica, Arial, sans-serif;
+  --headers-fourth-desktop: 600 16px/24px 'Inter Semi Bold', Roboto, Helvetica, Arial, sans-serif;
+  --map-mobile: 400 10px/14px 'Inter Regular', Roboto, Helvetica, Arial, sans-serif;
+  --map-desktop: 400 8px/12px 'Inter Regular', Roboto, Helvetica, Arial, sans-serif;
+  --not-found-page-heading: 600 28px/36px 'Inter Semi Bold', Roboto, Helvetica, Arial, sans-serif;
+  --pagination: 400 20px/24px 'Inter Regular', Roboto, Helvetica, Arial, sans-serif;
+
+  /* colors */
+  --main-accent-color: #46c86a;
+  --main-accent-color-hover: #a2e4b4;
+  --secondary-accent-color: #465bc8;
+  --secondary-accent-color-hover: #a2ade4;
+  --text-color: #000;
+  --text-color-hover: #808080;
+  --secondary-text: #808080;
+  --secondary-text-hover: #bfbfbf;
+  --strip-color: #e5e5e5;
+  --strip-color-hover: #f2f2f2;
+  --main-background: #fff;
+  --main-background-hover: #f2f2f2;
+  --secondary-background: #f2f2f2;
+  --secondary-background-hover: #f9f9f9;
+  --line-color: #ebebeb;
+  --search-border: #dadada;
+
+  /* media */
+  --mobile-width: 375px;
+  --tablet-width: 768px;
+  --desktop-width: 1440px;
+}

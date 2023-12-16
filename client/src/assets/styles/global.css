@@ -1,0 +1,45 @@
+html {
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  font-family: var(--text);
+  font-feature-settings:
+    'pnum' on,
+    'lnum' on;
+  font-variant-numeric: lining-nums;
+  color: var(--text-color);
+  background: var(--main-background);
+}
+
+a {
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(100%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.prohibit-scrolling {
+  overflow: hidden;
+}
