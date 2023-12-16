@@ -1,9 +1,11 @@
+import { Abonent } from '../../schemas/abonent.schema';
+import { CreateAbonentDto } from '../dto/create-abonent.dto';
+
 export interface IAbonentsService {
-  createAbonent(data: any): Promise<any>;
-  fetchAllAbonents(): Promise<any[]>;
-  findAbonentById(id: number): Promise<Omit<any, 'passwordHash'>>;
-  updateAbonent(id: number, data: any): Promise<any>;
+  createAbonent(data: CreateAbonentDto): Promise<Abonent>;
+  fetchAllAbonents(queryParams: any): Promise<Abonent[]>;
+  findAbonentById(id: number): Promise<Abonent>;
   deleteAbonent(id: number): Promise<void>;
 }
 
-// TODO: ждут модели. Возвращаемые эни - модель абонента. При создании - create-abonent.dto.ts, при редактировании update-user.dto.ts
+// TODO: Также квери параметры - страница, сортировка, фильтры

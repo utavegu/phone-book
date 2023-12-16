@@ -2,12 +2,14 @@ import {
   Controller,
   Post,
   Get,
-  Put,
   Delete,
   Body,
   Param,
+  Query,
 } from '@nestjs/common';
 import { AbonentsService } from './abonents.service';
+import { Abonent } from './schemas/abonent.schema';
+import { CreateAbonentDto } from './typespaces/dto/create-abonent.dto';
 
 // TODO: not any
 
@@ -16,26 +18,18 @@ export class AbonentsController {
   constructor(private readonly abonentsService: AbonentsService) {}
 
   @Post()
-  createAbonent(@Body() createAbonentDto: any): Promise<any> {
+  createAbonent(@Body() createAbonentDto: CreateAbonentDto): Promise<Abonent> {
     return this.abonentsService.createAbonent(createAbonentDto);
   }
 
   @Get()
-  fetchAllAbonents(): Promise<any[]> {
-    return this.abonentsService.fetchAllAbonents();
+  fetchAllAbonents(@Query() queryParams: any): Promise<Abonent[]> {
+    return this.abonentsService.fetchAllAbonents(queryParams);
   }
 
   @Get(':id')
-  findAbonentById(@Param('id') id: number): Promise<Omit<any, 'passwordHash'>> {
+  findAbonentById(@Param('id') id: number): Promise<Abonent> {
     return this.abonentsService.findAbonentById(id);
-  }
-
-  @Put()
-  updateAbonent(
-    @Param('id') id: number,
-    @Body() updateUserDto: any,
-  ): Promise<Omit<any, 'passwordHash'>> {
-    return this.abonentsService.updateAbonent(id, updateUserDto);
   }
 
   @Delete()

@@ -6,12 +6,12 @@ export class Abonent {
   @Prop({
     required: true,
   })
-  name: string;
+  surname: string;
 
   @Prop({
     required: true,
   })
-  surname: string;
+  name: string;
 
   @Prop()
   patronymic: string;
@@ -20,7 +20,7 @@ export class Abonent {
     required: true,
     unique: true,
   })
-  phone: number;
+  phone: string;
 
   @Prop({
     required: true,
