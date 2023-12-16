@@ -3,19 +3,19 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './modules/app/app.module';
 import { ExtendedException } from './filters/extended-exception.filter';
 import { ValidationPipe } from './validation/validation.pipe';
+import { clientExternalPort, serverExternalPort } from './config';
 
 async function bootstrap() {
-  const PORT = process.env.PORT || 5000;
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app
     .setGlobalPrefix('api')
     .useGlobalFilters(new ExtendedException())
     .useGlobalPipes(new ValidationPipe())
-    .enableCors({ origin: ['http://localhost:3000'] });
+    .enableCors({ origin: [`http://localhost:${clientExternalPort}`] });
 
-  await app.listen(PORT, () =>
-    console.log(`Сервер успешно стартанул на ${PORT} порту!`),
+  await app.listen(serverExternalPort, () =>
+    console.log(`Сервер успешно стартанул на ${serverExternalPort} порту!`),
   );
 }
 

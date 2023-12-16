@@ -1,14 +1,24 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AbonentsModule } from '../abonents/abonents.module';
+import {
+  dbName,
+  mongoDbLogin,
+  mongoDbPassword,
+  mongoInternalPort,
+  mongoServiceName,
+} from 'src/config';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(`mongodb://mongo:27017`, {
-      user: 'root',
-      pass: 'example',
-      dbName: 'phone-book',
-    }),
+    MongooseModule.forRoot(
+      `mongodb://${mongoServiceName}:${mongoInternalPort}`,
+      {
+        user: mongoDbLogin,
+        pass: mongoDbPassword,
+        dbName: dbName,
+      },
+    ),
     AbonentsModule,
   ],
   controllers: [],
