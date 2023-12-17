@@ -3,6 +3,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { getFilters } from 'src/helpers/getFilters';
 import { IAbonentsService } from './typespaces/interfaces/IAbonentsService';
 import { Abonent, AbonentDocument } from './schemas/abonent.schema';
 import { CreateAbonentDto } from './typespaces/dto/create-abonent.dto';
@@ -28,16 +29,17 @@ export class AbonentsService implements IAbonentsService {
     itemsPerPage = '2', // TODO: пусть будет 5 (и на клиенте), но нужно будет расширить базу
     page = '1',
     sortingType = { surname: SortingOrders.ASC },
+    columnName,
+    columnValues,
   }: IQueryParams): Promise<{
     findedAbonents: Abonent[];
     totalAbonents: number;
   }> {
     try {
       const offset = (Number(page) - 1) * Number(itemsPerPage);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const totalAbonents = await this.AbonentModel.find().count();
-      const findedAbonents = await this.AbonentModel.find()
+      const filters = getFilters(columnName, columnValues);
+      const totalAbonents = await this.AbonentModel.countDocuments(filters);
+      const findedAbonents = await this.AbonentModel.find(filters)
         .limit(Number(itemsPerPage))
         .skip(offset)
         .sort(sortingType)
