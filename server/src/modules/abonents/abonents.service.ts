@@ -6,6 +6,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { IAbonentsService } from './typespaces/interfaces/IAbonentsService';
 import { Abonent, AbonentDocument } from './schemas/abonent.schema';
 import { CreateAbonentDto } from './typespaces/dto/create-abonent.dto';
+import { IQueryParams } from './typespaces/interfaces/IQueryParams';
 
 @Injectable()
 export class AbonentsService implements IAbonentsService {
@@ -22,10 +23,23 @@ export class AbonentsService implements IAbonentsService {
     }
   }
 
-  async fetchAllAbonents(queryParams: any): Promise<Abonent[]> {
+  async fetchAllAbonents({
+    itemsPerPage = '2',
+    page = '1',
+  }: IQueryParams): Promise<{
+    findedAbonents: Abonent[];
+    totalAbonents: number;
+  }> {
     try {
-      const findedAbonents = await this.AbonentModel.find().select('-__v');
-      return findedAbonents;
+      const offset = (Number(page) - 1) * Number(itemsPerPage);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const totalAbonents = await this.AbonentModel.find().count();
+      const findedAbonents = await this.AbonentModel.find()
+        .limit(Number(itemsPerPage))
+        .skip(offset)
+        .select('-__v');
+      return { findedAbonents, totalAbonents };
     } catch (err) {
       throw new HttpException(err.message, err.status || 500);
     }

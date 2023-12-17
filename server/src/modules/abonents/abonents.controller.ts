@@ -10,8 +10,7 @@ import {
 import { AbonentsService } from './abonents.service';
 import { Abonent } from './schemas/abonent.schema';
 import { CreateAbonentDto } from './typespaces/dto/create-abonent.dto';
-
-// TODO: not any
+import { IQueryParams } from './typespaces/interfaces/IQueryParams';
 
 @Controller('abonents')
 export class AbonentsController {
@@ -23,7 +22,9 @@ export class AbonentsController {
   }
 
   @Get()
-  fetchAllAbonents(@Query() queryParams: any): Promise<Abonent[]> {
+  fetchAllAbonents(
+    @Query() queryParams: IQueryParams, // TODO: Валидировать ли вас или перебор?
+  ): Promise<{ findedAbonents: Abonent[]; totalAbonents: number }> {
     return this.abonentsService.fetchAllAbonents(queryParams);
   }
 
