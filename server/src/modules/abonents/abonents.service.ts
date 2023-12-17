@@ -7,6 +7,7 @@ import { IAbonentsService } from './typespaces/interfaces/IAbonentsService';
 import { Abonent, AbonentDocument } from './schemas/abonent.schema';
 import { CreateAbonentDto } from './typespaces/dto/create-abonent.dto';
 import { IQueryParams } from './typespaces/interfaces/IQueryParams';
+import { SortingOrders } from './typespaces/enums/sorting-orders.enum';
 
 @Injectable()
 export class AbonentsService implements IAbonentsService {
@@ -24,8 +25,9 @@ export class AbonentsService implements IAbonentsService {
   }
 
   async fetchAllAbonents({
-    itemsPerPage = '2',
+    itemsPerPage = '2', // TODO: пусть будет 5 (и на клиенте), но нужно будет расширить базу
     page = '1',
+    sortingType = { surname: SortingOrders.ASC },
   }: IQueryParams): Promise<{
     findedAbonents: Abonent[];
     totalAbonents: number;
@@ -38,6 +40,7 @@ export class AbonentsService implements IAbonentsService {
       const findedAbonents = await this.AbonentModel.find()
         .limit(Number(itemsPerPage))
         .skip(offset)
+        .sort(sortingType)
         .select('-__v');
       return { findedAbonents, totalAbonents };
     } catch (err) {
