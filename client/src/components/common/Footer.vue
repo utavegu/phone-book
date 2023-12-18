@@ -89,7 +89,7 @@
 
       <div class="second-line">
         <div class="offer-block">
-          <NuxtLink to="/user-agreement">Пользовательское соглашение</NuxtLink>
+          <NuxtLink to="/">Пользовательское соглашение</NuxtLink>
           <span>Политика конфиденциальности</span>
         </div>
 
