@@ -26,9 +26,9 @@ export class AbonentsService implements IAbonentsService {
   }
 
   async fetchAllAbonents({
-    itemsPerPage = '2', // TODO: пусть будет 5 (и на клиенте), но нужно будет расширить базу
+    itemsPerPage = '3', // TODO: пусть будет 5 (и на клиенте), но нужно будет расширить базу
     page = '1',
-    sortingType = { surname: SortingOrders.ASC },
+    sortingType,
     columnName,
     columnValues,
   }: IQueryParams): Promise<{
@@ -36,13 +36,17 @@ export class AbonentsService implements IAbonentsService {
     totalAbonents: number;
   }> {
     try {
+      // TODO. При использовании $fetch приходит {"surname":"desc"}, а должно {surname: "desc"}. Аксиос парсит сам. Посмотри в настройках фетча.
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const parsedSortingType = JSON.parse(sortingType);
       const offset = (Number(page) - 1) * Number(itemsPerPage);
       const filters = getFilters(columnName, columnValues);
       const totalAbonents = await this.AbonentModel.countDocuments(filters);
       const findedAbonents = await this.AbonentModel.find(filters)
         .limit(Number(itemsPerPage))
         .skip(offset)
-        .sort(sortingType)
+        .sort(parsedSortingType)
         .select('-__v');
       return { findedAbonents, totalAbonents };
     } catch (err) {
@@ -56,5 +60,13 @@ export class AbonentsService implements IAbonentsService {
 
   async deleteAbonent(id: number): Promise<void> {
     throw new Error('Method not implemented.');
+  }
+
+  async getUniqueColumnValues(columnName: string): Promise<string[]> {
+    try {
+      return await this.AbonentModel.distinct(columnName);
+    } catch (err) {
+      throw new HttpException(err.message, err.status || 500);
+    }
   }
 }

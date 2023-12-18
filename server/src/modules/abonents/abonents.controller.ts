@@ -37,4 +37,11 @@ export class AbonentsController {
   deleteAbonent(id: number): Promise<void> {
     return this.abonentsService.deleteAbonent(id);
   }
+
+  @Get('column/:columnName')
+  getUniqueColumnValues(
+    @Param('columnName') columnName: string,
+  ): Promise<string[]> {
+    return this.abonentsService.getUniqueColumnValues(columnName);
+  }
 }
