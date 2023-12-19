@@ -1,5 +1,5 @@
 <!-- TODO: вернуть ts -->
-<script setup lang="js">
+<script setup>
 import { ref, watch, computed } from 'vue';
 import { titles } from '@/data/titles';
 import { getSortingType } from '@/helpers/getSortingType';
@@ -72,8 +72,8 @@ function clearFilters() {
 
 <template>
   <v-select
-    label="Выберите столбец для фильтрации"
     v-model="selectedColumnName"
+    label="Выберите столбец для фильтрации"
     :items="['surname', 'name', 'email', 'phone', 'city', 'street']"
   />
 
@@ -81,9 +81,9 @@ function clearFilters() {
     <!-- TODO: Крестик добавить полю, там по-моему через вендорные префиксы можно -->
     <input
       id="search"
+      v-model="searchString"
       type="search"
       placeholder="Поиск"
-      v-model="searchString"
     />
     <ul>
       <li
@@ -93,9 +93,9 @@ function clearFilters() {
         <label>
           {{ searchedValue }}
           <input
+            v-model="checkedValues"
             type="checkbox"
             v-bind:value="searchedValue"
-            v-model="checkedValues"
           />
         </label>
       </li>
@@ -113,8 +113,8 @@ function clearFilters() {
 
   <!-- Также подумать на счёт работы с ошибками, наверняка там есть и атрибут error, раз есть loading. И текст лоадингу свой сделай -->
   <v-data-table-server
-    item-value="name"
     v-model:items-per-page="itemsPerPage"
+    item-value="name"
     v-bind:search="tableForceRerenderer"
     v-bind:headers="tableHeaders"
     v-bind:items-length="totalItems"

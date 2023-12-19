@@ -22,7 +22,7 @@ export const noteCreatingValidationSchema = yup.object().shape({
   phone: yup
     .string()
     .required(VALIDATION_ERROR.IS_REQUIRED)
-    .matches(/^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$/, VALIDATION_ERROR.RU_PHONE_NUMBER),
+    .matches(/^((8|\+7)[- ]?)?(\(?\d{3}\)?[- ]?)?[\d\- ]{7,10}$/, VALIDATION_ERROR.RU_PHONE_NUMBER),
   email: yup
     .string()
     .required(VALIDATION_ERROR.IS_REQUIRED)

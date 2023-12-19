@@ -1,4 +1,4 @@
-import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
+import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify';
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   srcDir: 'src/',
@@ -18,7 +18,7 @@ export default defineNuxtConfig({
         { name: 'MobileOptimized', content: 'width' },
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
       ],
-    }
+    },
   },
   // publicRuntimeConfig: {
   //   NUXT_ENV_API_BASE_URL: process.env.NUXT_ENV_API_BASE_URL
@@ -34,10 +34,9 @@ export default defineNuxtConfig({
     (_options, nuxt) => {
       nuxt.hooks.hook('vite:extendConfig', (config) => {
         // @ts-expect-error
-        config.plugins.push(vuetify({ autoImport: true }))
-      })
+        config.plugins.push(vuetify({ autoImport: true }));
+      });
     },
-    //...
   ],
   vite: {
     vue: {
@@ -46,4 +45,4 @@ export default defineNuxtConfig({
       },
     },
   },
-})
+});

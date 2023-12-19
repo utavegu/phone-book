@@ -26,7 +26,7 @@ const submit = handleSubmit(async (values) => {
     });
     handleReset();
   } catch (err) {
-    console.error(err);
+    // console.error(err);
   }
 });
 </script>
