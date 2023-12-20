@@ -8,7 +8,7 @@ import { getColumnValues } from '@/helpers/getColumnValues';
 const tableHeaders = ref(titles);
 const serverItems = ref([]); // вероятно должно быть компьютед-свойством (а то тут (по крайней мере в данный момент) много левого движа в компоненте происходит)
 const totalItems = ref(0);
-const itemsPerPage = ref(3);
+const itemsPerPage = ref(10);
 const loading = ref(true);
 const tableForceRerenderer = ref('');
 const uniqueColumnValues = ref([]);
@@ -17,6 +17,7 @@ const checkedValues = ref([]);
 const selectedColumnName = ref('');
 const deletedItemId = ref('');
 const isDialogDeleteOpen = ref(false);
+const isDialogCreateOpen = ref(false);
 
 const searchedValues = computed(() => {
   return uniqueColumnValues.value.filter((city) =>
@@ -98,16 +99,18 @@ function deleteItemConfirm() {
   deletedItemId.value = '';
   closeDeleteDialog();
 }
+
+function openCreateFormModal() {
+  isDialogCreateOpen.value = true;
+}
+
+function closeCreateFormModal() {
+  isDialogCreateOpen.value = false;
+}
 </script>
 
 <template>
-  <!-- Переедешь в шапку таблицы -->
-  <v-select
-    v-model="selectedColumnName"
-    label="Выберите столбец для фильтрации"
-    :items="['surname', 'name', 'email', 'phone', 'city', 'street']"
-  />
-
+  <!-- Тоже в модалку - третий вариант -->
   <div v-if="selectedColumnName">
     <!-- TODO: Крестик добавить полю, там по-моему через вендорные префиксы можно -->
     <input
@@ -143,6 +146,7 @@ function deleteItemConfirm() {
   </div>
 
   <!-- МОДАЛКА ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ (прокидывать пропсом). И сама пусть пропсы принимает. Чего алигн красный? -->
+  <!-- И вообще у вас же меняется только содержимое. Надо через ви-иф сделать его отображение, а диалог оставить 1 -->
   <v-dialog
     v-model="isDialogDeleteOpen"
     max-width="300px"
@@ -172,6 +176,36 @@ function deleteItemConfirm() {
     </v-card>
   </v-dialog>
 
+  <!-- МОДАЛКА ДОБАВЛЕНИЯ ЗАПИСИ -->
+  <v-dialog
+    v-model="isDialogCreateOpen"
+    max-width="800px"
+  >
+    <v-card>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-icon
+          size="small"
+          v-on:click="closeCreateFormModal"
+        >
+          mdi-close
+        </v-icon>
+      </v-card-actions>
+      <v-card-title>
+        <span class="text-h5">{{ formTitle }}</span>
+      </v-card-title>
+      <vuetify-form />
+    </v-card>
+  </v-dialog>
+
+  <!-- 
+    Объединение модалок (рефактор):
+    1) В слот при вызове кидать разных чилдренов (смотри как в твоей модалке было)
+    2) Задание разной максимальной ширины
+    3) В форму надо прокидывать силовой ререндер таблицы и закрытие модалки. Хотя второе скорее не
+    4) Открытие-закрытие модалки - отдельная логика, не связанная с ее содержимым
+  -->
+
   <!-- Также подумать на счёт работы с ошибками, наверняка там есть и атрибут error, раз есть loading. И текст лоадингу свой сделай -->
   <v-data-table-server
     v-model:items-per-page="itemsPerPage"
@@ -183,6 +217,36 @@ function deleteItemConfirm() {
     v-bind:loading="loading"
     v-on:update:options="loadItems"
   >
+    <template v-slot:top>
+      <v-toolbar flat>
+        <v-toolbar-title>Телефонный справочник</v-toolbar-title>
+        <v-spacer />
+        <v-divider
+          class="mx-4"
+          inset
+          vertical
+        />
+        <!-- TODO: селект и кнопку выровнять по центру относительно заголовка -->
+        <v-select
+          v-model="selectedColumnName"
+          label="Выберите столбец для фильтрации"
+          :items="['surname', 'name', 'email', 'phone', 'city', 'street']"
+        />
+        <v-divider
+          class="mx-4"
+          inset
+          vertical
+        />
+        <v-btn
+          color="primary"
+          dark
+          class="mb-2"
+          v-on:click="openCreateFormModal"
+        >
+          Добавить запись
+        </v-btn>
+      </v-toolbar>
+    </template>
     <!-- Разобраться -->
     <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template v-slot:item.actions="{ item }">
