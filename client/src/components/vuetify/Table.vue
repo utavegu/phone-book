@@ -2,15 +2,14 @@
 <script setup>
 import { ref, watch, computed } from 'vue';
 import { titles } from '@/data/titles';
-import { getSortingType } from '@/helpers/getSortingType';
-import { getColumnValues } from '@/helpers/getColumnValues';
+import { fetchAbonentsApi, fetchUniqueColumnValuesApi, deleteNoteApi } from '@/api/services/abonentsApi';
 
 const tableHeaders = ref(titles);
 const serverItems = ref([]); // вероятно должно быть компьютед-свойством (а то тут (по крайней мере в данный момент) много левого движа в компоненте происходит)
 const totalItems = ref(0);
 const itemsPerPage = ref(10);
 const loading = ref(true);
-const tableForceRerenderer = ref('');
+const revalidateDataHandler = ref('');
 const uniqueColumnValues = ref([]);
 const searchString = ref('');
 const checkedValues = ref([]);
@@ -26,56 +25,39 @@ const searchedValues = computed(() => {
 });
 
 watch(checkedValues, () => {
-  tableForceRerenderer.value = String(Date.now()); // Это походит на какой-то костыль, но именно так это рекомендуется делать в официальной документации к v-data-table-server
+  revalidateDataHandler.value = String(Date.now()); // Это походит на какой-то костыль, но именно так это рекомендуется делать в официальной документации к v-data-table-server
 });
 
 watch(selectedColumnName, () => {
-  tableForceRerenderer.value = String(Date.now());
+  revalidateDataHandler.value = String(Date.now());
   uniqueColumnValues.value = [];
   checkedValues.value = [];
   searchString.value = '';
   getUniqueColumnValues();
 });
 
-// В Вуе работа с апи должна происходить в методах жизненного цикла (хотя это коллбэки...). Как в Нуксте - уточни ещё. Ну и скорее всего нужно бы фетч ещё в "юзАсинк" завернуть, чтобы запросы не дублировались. Ну и вообще через стор, по хорошему. Но раз Нукст, приоритетная задача - ССР
-// TODO: refactor (+ трай-кэтч... ну и файнали для лоадинга)
 async function loadItems({ page, itemsPerPage, sortBy }) {
   loading.value = true;
-  // Енвы, апи
-  const abonents = await $fetch('http://localhost:5000/api/abonents', {
-    method: 'get',
-    params: {
-      page,
-      itemsPerPage,
-      sortingType: getSortingType(sortBy),
-      columnName: toRaw(selectedColumnName.value), // TODO: Вот тут словарик прикрути, а принимай русскоязычные значения
-      columnValues: getColumnValues(toRaw(checkedValues.value)),
-    },
-  });
+  const abonents = await fetchAbonentsApi(
+    page,
+    itemsPerPage,
+    sortBy,
+    toRaw(selectedColumnName.value),
+    toRaw(checkedValues.value)
+  );
   serverItems.value = abonents.findedAbonents;
   totalItems.value = abonents.totalAbonents;
   loading.value = false;
 }
 
-// TODO: refactor (+ трай-кэтч... ну и файнали для лоадинга)
 async function getUniqueColumnValues() {
-  // Енвы, апи
-  const cities = await $fetch(`http://localhost:5000/api/abonents/column/${toRaw(selectedColumnName.value)}`, {
-    method: 'get',
-  });
-  uniqueColumnValues.value = cities;
+  const distinctedValues = await fetchUniqueColumnValuesApi(toRaw(selectedColumnName.value));
+  uniqueColumnValues.value = distinctedValues;
 }
 
-// TODO: refactor
 async function deleteNote(noteId) {
-  try {
-    await $fetch(`http://localhost:5000/api/abonents/${noteId}`, {
-      method: 'delete',
-    });
-    tableForceRerenderer.value = String(Date.now());
-  } catch (err) {
-    console.error(err);
-  }
+  await deleteNoteApi(noteId);
+  revalidateDataHandler.value = String(Date.now());
 }
 
 function clearFilters() {
@@ -112,7 +94,7 @@ function closeCreateFormModal() {
 <template>
   <!-- Тоже в модалку - третий вариант -->
   <div v-if="selectedColumnName">
-    <!-- TODO: Крестик добавить полю, там по-моему через вендорные префиксы можно -->
+    <!-- TODO: Крестик добавить полю, там по-моему через вендорные префиксы можно. А вообще у вуетифай свой сёрч есть вроде -->
     <input
       id="search"
       v-model="searchString"
@@ -160,7 +142,7 @@ function closeCreateFormModal() {
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn
-          color="grey-lighten-3"
+          color="blue-darken-1"
           variant="text"
           v-on:click="closeDeleteDialog"
           >Нет</v-btn
@@ -199,7 +181,7 @@ function closeCreateFormModal() {
   </v-dialog>
 
   <!-- 
-    Объединение модалок (рефактор):
+    Объединение модалок (рефактор, DRY):
     1) В слот при вызове кидать разных чилдренов (смотри как в твоей модалке было)
     2) Задание разной максимальной ширины
     3) В форму надо прокидывать силовой ререндер таблицы и закрытие модалки. Хотя второе скорее не
@@ -210,7 +192,7 @@ function closeCreateFormModal() {
   <v-data-table-server
     v-model:items-per-page="itemsPerPage"
     item-value="name"
-    v-bind:search="tableForceRerenderer"
+    v-bind:search="revalidateDataHandler"
     v-bind:headers="tableHeaders"
     v-bind:items-length="totalItems"
     v-bind:items="serverItems"
