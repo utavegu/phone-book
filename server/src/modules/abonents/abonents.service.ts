@@ -54,12 +54,13 @@ export class AbonentsService implements IAbonentsService {
     }
   }
 
-  async findAbonentById(id: number): Promise<Abonent> {
-    throw new Error('Method not implemented.');
-  }
-
   async deleteAbonent(id: number): Promise<void> {
-    throw new Error('Method not implemented.');
+    try {
+      await this.AbonentModel.findByIdAndDelete(id);
+      return;
+    } catch (err) {
+      throw new HttpException(err.message, err.status || 500);
+    }
   }
 
   async getUniqueColumnValues(columnName: string): Promise<string[]> {

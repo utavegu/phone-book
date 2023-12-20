@@ -5,9 +5,8 @@ import { titles } from '@/data/titles';
 import { getSortingType } from '@/helpers/getSortingType';
 import { getColumnValues } from '@/helpers/getColumnValues';
 
-// Нэйминг
 const tableHeaders = ref(titles);
-const serverItems = ref([]); // вероятно должно быть компьютед-свойством
+const serverItems = ref([]); // вероятно должно быть компьютед-свойством (а то тут (по крайней мере в данный момент) много левого движа в компоненте происходит)
 const totalItems = ref(0);
 const itemsPerPage = ref(3);
 const loading = ref(true);
@@ -16,6 +15,8 @@ const uniqueColumnValues = ref([]);
 const searchString = ref('');
 const checkedValues = ref([]);
 const selectedColumnName = ref('');
+const deletedItemId = ref('');
+const isDialogDeleteOpen = ref(false);
 
 const searchedValues = computed(() => {
   return uniqueColumnValues.value.filter((city) =>
@@ -35,7 +36,8 @@ watch(selectedColumnName, () => {
   getUniqueColumnValues();
 });
 
-// В Вуе работа с апи должна происходить в методах жизненного цикла (хотя это коллбэки...). Как в Нуксте - уточни ещё. Ну и скорее всего нужно бы фетч ещё в "юзАсинк" завернуть, чтобы запросы не дублировались
+// В Вуе работа с апи должна происходить в методах жизненного цикла (хотя это коллбэки...). Как в Нуксте - уточни ещё. Ну и скорее всего нужно бы фетч ещё в "юзАсинк" завернуть, чтобы запросы не дублировались. Ну и вообще через стор, по хорошему. Но раз Нукст, приоритетная задача - ССР
+// TODO: refactor (+ трай-кэтч... ну и файнали для лоадинга)
 async function loadItems({ page, itemsPerPage, sortBy }) {
   loading.value = true;
   // Енвы, апи
@@ -54,6 +56,7 @@ async function loadItems({ page, itemsPerPage, sortBy }) {
   loading.value = false;
 }
 
+// TODO: refactor (+ трай-кэтч... ну и файнали для лоадинга)
 async function getUniqueColumnValues() {
   // Енвы, апи
   const cities = await $fetch(`http://localhost:5000/api/abonents/column/${toRaw(selectedColumnName.value)}`, {
@@ -62,15 +65,43 @@ async function getUniqueColumnValues() {
   uniqueColumnValues.value = cities;
 }
 
+// TODO: refactor
+async function deleteNote(noteId) {
+  try {
+    await $fetch(`http://localhost:5000/api/abonents/${noteId}`, {
+      method: 'delete',
+    });
+    tableForceRerenderer.value = String(Date.now());
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 function clearFilters() {
   uniqueColumnValues.value = [];
   checkedValues.value = [];
   selectedColumnName.value = '';
   searchString.value = '';
 }
+
+function deleteItem(item) {
+  deletedItemId.value = item._id;
+  isDialogDeleteOpen.value = true;
+}
+
+function closeDeleteDialog() {
+  isDialogDeleteOpen.value = false;
+}
+
+function deleteItemConfirm() {
+  deleteNote(deletedItemId.value);
+  deletedItemId.value = '';
+  closeDeleteDialog();
+}
 </script>
 
 <template>
+  <!-- Переедешь в шапку таблицы -->
   <v-select
     v-model="selectedColumnName"
     label="Выберите столбец для фильтрации"
@@ -111,6 +142,36 @@ function clearFilters() {
     >
   </div>
 
+  <!-- МОДАЛКА ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ (прокидывать пропсом). И сама пусть пропсы принимает. Чего алигн красный? -->
+  <v-dialog
+    v-model="isDialogDeleteOpen"
+    max-width="300px"
+  >
+    <v-card>
+      <v-card-title
+        class="text-h5"
+        align="center"
+        >Удалить эту запись?</v-card-title
+      >
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn
+          color="grey-lighten-3"
+          variant="text"
+          v-on:click="closeDeleteDialog"
+          >Нет</v-btn
+        >
+        <v-btn
+          color="red-darken-1"
+          variant="text"
+          v-on:click="deleteItemConfirm"
+          >Да</v-btn
+        >
+        <v-spacer></v-spacer>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
   <!-- Также подумать на счёт работы с ошибками, наверняка там есть и атрибут error, раз есть loading. И текст лоадингу свой сделай -->
   <v-data-table-server
     v-model:items-per-page="itemsPerPage"
@@ -121,10 +182,19 @@ function clearFilters() {
     v-bind:items="serverItems"
     v-bind:loading="loading"
     v-on:update:options="loadItems"
-  />
+  >
+    <!-- Разобраться -->
+    <!-- eslint-disable-next-line vue/valid-v-slot -->
+    <template v-slot:item.actions="{ item }">
+      <v-icon
+        size="small"
+        v-on:click="deleteItem(item)"
+      >
+        mdi-delete
+      </v-icon>
+    </template>
+  </v-data-table-server>
   <!--
-      Есть вариант сделать таблицу с закрывающим тэгом и передать туда чилдрены, в них можно выбрать месторасположение для отображение, вероятно там может быть и вариант "попап для выбранного столбца" - изучай АПИ
-      Но, в принципе, вырвать его и показывать по клику на воронку тоже не особо сложная задача, если что. Только нужно будет стоп-пропагейшн сортировки делать тогда
-      Фифти-фифти можно фильтры модалкой сделать ещё, как вариант.
+      Ну вот судя по обилию слотов в таблице, наверняка что-то должно быть и в духе "клик по воронке -> контексное меню столбца". Но если не найду и будет время, тогда: попап самодельный и привязанный к конкретному столбцу. Там только нужно будет стоп-пропагейшн на воронку, чтобы не вызывать сортировку столбца. Но самая программа минимум - упихать селект выбора столбца в шапку. А там уж как пойдет.
   -->
 </template>

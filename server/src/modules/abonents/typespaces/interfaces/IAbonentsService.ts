@@ -7,7 +7,6 @@ export interface IAbonentsService {
   fetchAllAbonents(
     queryParams: IQueryParams,
   ): Promise<{ findedAbonents: Abonent[]; totalAbonents: number }>;
-  findAbonentById(id: number): Promise<Abonent>;
   deleteAbonent(id: number): Promise<void>;
   getUniqueColumnValues(columnName: string): Promise<string[]>;
 }

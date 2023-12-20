@@ -28,20 +28,16 @@ export class AbonentsController {
     return this.abonentsService.fetchAllAbonents(queryParams);
   }
 
-  @Get(':id')
-  findAbonentById(@Param('id') id: number): Promise<Abonent> {
-    return this.abonentsService.findAbonentById(id);
-  }
-
-  @Delete()
-  deleteAbonent(id: number): Promise<void> {
-    return this.abonentsService.deleteAbonent(id);
-  }
-
   @Get('column/:columnName')
   getUniqueColumnValues(
     @Param('columnName') columnName: string,
   ): Promise<string[]> {
     return this.abonentsService.getUniqueColumnValues(columnName);
+  }
+
+  // TODO: id validation pipe
+  @Delete(':id')
+  deleteAbonent(@Param('id') id: number): Promise<void> {
+    return this.abonentsService.deleteAbonent(id);
   }
 }

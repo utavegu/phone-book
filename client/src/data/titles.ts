@@ -60,4 +60,10 @@ export const titles = [
     align: 'center',
     sortable: false,
   },
+  {
+    title: '',
+    key: 'actions',
+    align: 'center',
+    sortable: false,
+  },
 ];
