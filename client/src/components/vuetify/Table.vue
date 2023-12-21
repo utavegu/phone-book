@@ -155,8 +155,8 @@ function toggleFilter(columnHeading) {
   >
     <template
       v-for="(item, index) in ['surname', 'name', 'patronymic', 'email', 'phone', 'city']"
+      v-bind:key="index"
       v-slot:[`header.${item}`]="{ column }"
-      :key="index"
     >
       {{ column.title }}
       <v-btn
@@ -175,7 +175,7 @@ function toggleFilter(columnHeading) {
         <v-card>
           <v-text-field
             v-model="searchString"
-            :loading="loading"
+            v-bind:loading="loading"
             density="compact"
             variant="outlined"
             label="Поиск"
@@ -187,7 +187,7 @@ function toggleFilter(columnHeading) {
           <v-list>
             <v-list-item
               v-for="searchedValue in searchedValues.slice(0, 4)"
-              :key="searchedValue"
+              v-bind:key="searchedValue"
             >
               <label>
                 {{ searchedValue }}
@@ -215,23 +215,10 @@ function toggleFilter(columnHeading) {
     </template>
 
     <template v-slot:top>
-      <v-toolbar flat>
-        <v-toolbar-title>Телефонный справочник</v-toolbar-title>
-        <v-spacer />
-        <v-divider
-          class="mx-4"
-          inset
-          vertical
-        />
-        <v-btn
-          color="primary"
-          dark
-          class="mb-2"
-          v-on:click="openCreateFormModal"
-        >
-          Добавить запись (ВЫРОВНЯТЬ ПО ВЫСОТЕ)
-        </v-btn>
-      </v-toolbar>
+      <table-toolbar
+        title="Телефонный справочник"
+        v-on:open-create-form-modal="openCreateFormModal"
+      />
     </template>
 
     <!-- Разобраться -->
