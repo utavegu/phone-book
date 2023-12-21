@@ -28,31 +28,27 @@ watch(checkedValues, () => {
   revalidateDataHandler.value = String(Date.now()); // Это походит на какой-то костыль, но именно так это рекомендуется делать в официальной документации к v-data-table-server
 });
 
-watch(selectedColumnName, () => {
-  revalidateDataHandler.value = String(Date.now());
-  uniqueColumnValues.value = [];
-  checkedValues.value = [];
+watch(selectedColumnName, async (columnName) => {
+  await getUniqueColumnValues(columnName);
+  if (checkedValues.value.length) {
+    checkedValues.value = [];
+  }
   searchString.value = '';
-  getUniqueColumnValues();
 });
 
 async function loadItems({ page, itemsPerPage, sortBy }) {
   loading.value = true;
-  const abonents = await fetchAbonentsApi(
-    page,
-    itemsPerPage,
-    sortBy,
-    toRaw(selectedColumnName.value),
-    toRaw(checkedValues.value)
-  );
-  serverItems.value = abonents.findedAbonents;
-  totalItems.value = abonents.totalAbonents;
-  loading.value = false;
+  const abonents = await fetchAbonentsApi(page, itemsPerPage, sortBy, selectedColumnName.value, checkedValues.value);
+  // !!! findedAbonents (теряет их через раз) (следи так)
+  if (abonents) {
+    serverItems.value = abonents.findedAbonents;
+    totalItems.value = abonents.totalAbonents;
+    loading.value = false;
+  }
 }
 
-async function getUniqueColumnValues() {
-  const distinctedValues = await fetchUniqueColumnValuesApi(toRaw(selectedColumnName.value));
-  uniqueColumnValues.value = distinctedValues;
+async function getUniqueColumnValues(columnName) {
+  uniqueColumnValues.value = await fetchUniqueColumnValuesApi(columnName);
 }
 
 async function deleteNote(noteId) {
@@ -61,7 +57,6 @@ async function deleteNote(noteId) {
 }
 
 function clearFilters() {
-  uniqueColumnValues.value = [];
   checkedValues.value = [];
   selectedColumnName.value = '';
   searchString.value = '';
@@ -89,46 +84,14 @@ function openCreateFormModal() {
 function closeCreateFormModal() {
   isDialogCreateOpen.value = false;
 }
+
+function toggleFilter(columnHeading) {
+  selectedColumnName.value = columnHeading.key;
+}
 </script>
 
 <template>
-  <!-- Тоже в модалку - третий вариант -->
-  <div v-if="selectedColumnName">
-    <!-- TODO: Крестик добавить полю, там по-моему через вендорные префиксы можно. А вообще у вуетифай свой сёрч есть вроде -->
-    <input
-      id="search"
-      v-model="searchString"
-      type="search"
-      placeholder="Поиск"
-    />
-    <ul>
-      <li
-        v-for="searchedValue in searchedValues.slice(0, 4)"
-        :key="searchedValue"
-      >
-        <label>
-          {{ searchedValue }}
-          <input
-            v-model="checkedValues"
-            type="checkbox"
-            v-bind:value="searchedValue"
-          />
-        </label>
-      </li>
-    </ul>
-
-    <!-- TODO: Строкой: -->
-    <span>Выбранные значения для фильтрации: {{ checkedValues }}</span>
-
-    <ui-button
-      variant="colored-accent"
-      v-on:click="clearFilters"
-      >Очистить фильтры</ui-button
-    >
-  </div>
-
-  <!-- МОДАЛКА ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ (прокидывать пропсом). И сама пусть пропсы принимает. Чего алигн красный? -->
-  <!-- И вообще у вас же меняется только содержимое. Надо через ви-иф сделать его отображение, а диалог оставить 1 -->
+  <!-- МОДАЛКА ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ (прокидывать пропсом). И сама пусть пропсы принимает. Чего алигн красный? Депрекейтед? -->
   <v-dialog
     v-model="isDialogDeleteOpen"
     max-width="300px"
@@ -180,15 +143,6 @@ function closeCreateFormModal() {
     </v-card>
   </v-dialog>
 
-  <!-- 
-    Объединение модалок (рефактор, DRY):
-    1) В слот при вызове кидать разных чилдренов (смотри как в твоей модалке было)
-    2) Задание разной максимальной ширины
-    3) В форму надо прокидывать силовой ререндер таблицы и закрытие модалки. Хотя второе скорее не
-    4) Открытие-закрытие модалки - отдельная логика, не связанная с ее содержимым
-  -->
-
-  <!-- Также подумать на счёт работы с ошибками, наверняка там есть и атрибут error, раз есть loading. И текст лоадингу свой сделай -->
   <v-data-table-server
     v-model:items-per-page="itemsPerPage"
     item-value="name"
@@ -199,21 +153,71 @@ function closeCreateFormModal() {
     v-bind:loading="loading"
     v-on:update:options="loadItems"
   >
+    <template
+      v-for="(item, index) in ['surname', 'name', 'patronymic', 'email', 'phone', 'city']"
+      v-slot:[`header.${item}`]="{ column }"
+      :key="index"
+    >
+      {{ column.title }}
+      <v-btn
+        v-bind:id="column.key"
+        color="primary"
+        size="x-small"
+        v-on:click.stop="toggleFilter(column)"
+      >
+        <v-icon small> mdi-filter-variant </v-icon>
+      </v-btn>
+
+      <v-menu
+        v-bind:close-on-content-click="false"
+        v-bind:activator="`#${column.key}`"
+      >
+        <v-card>
+          <v-text-field
+            v-model="searchString"
+            :loading="loading"
+            density="compact"
+            variant="outlined"
+            label="Поиск"
+            append-inner-icon="mdi-magnify"
+            single-line
+            hide-details
+          ></v-text-field>
+          <!-- TODO: Тут бы лоадинг показывать, если значения ещё не подъехали -->
+          <v-list>
+            <v-list-item
+              v-for="searchedValue in searchedValues.slice(0, 4)"
+              :key="searchedValue"
+            >
+              <label>
+                {{ searchedValue }}
+                <input
+                  v-model="checkedValues"
+                  type="checkbox"
+                  v-bind:value="searchedValue"
+                />
+              </label>
+            </v-list-item>
+          </v-list>
+          <!-- TODO: Строкой -->
+          <span>Выбранные значения для фильтрации: {{ checkedValues }}</span>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              variant="elevated"
+              v-on:click="clearFilters"
+            >
+              Очистить фильтры
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-menu>
+    </template>
+
     <template v-slot:top>
       <v-toolbar flat>
         <v-toolbar-title>Телефонный справочник</v-toolbar-title>
         <v-spacer />
-        <v-divider
-          class="mx-4"
-          inset
-          vertical
-        />
-        <!-- TODO: селект и кнопку выровнять по центру относительно заголовка -->
-        <v-select
-          v-model="selectedColumnName"
-          label="Выберите столбец для фильтрации"
-          :items="['surname', 'name', 'email', 'phone', 'city', 'street']"
-        />
         <v-divider
           class="mx-4"
           inset
@@ -225,10 +229,11 @@ function closeCreateFormModal() {
           class="mb-2"
           v-on:click="openCreateFormModal"
         >
-          Добавить запись
+          Добавить запись (ВЫРОВНЯТЬ ПО ВЫСОТЕ)
         </v-btn>
       </v-toolbar>
     </template>
+
     <!-- Разобраться -->
     <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template v-slot:item.actions="{ item }">
@@ -240,7 +245,4 @@ function closeCreateFormModal() {
       </v-icon>
     </template>
   </v-data-table-server>
-  <!--
-      Ну вот судя по обилию слотов в таблице, наверняка что-то должно быть и в духе "клик по воронке -> контексное меню столбца". Но если не найду и будет время, тогда: попап самодельный и привязанный к конкретному столбцу. Там только нужно будет стоп-пропагейшн на воронку, чтобы не вызывать сортировку столбца. Но самая программа минимум - упихать селект выбора столбца в шапку. А там уж как пойдет.
-  -->
 </template>
