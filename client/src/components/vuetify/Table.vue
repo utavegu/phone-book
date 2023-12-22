@@ -48,6 +48,7 @@ async function loadItems({ page, itemsPerPage, sortBy }) {
 }
 
 async function getUniqueColumnValues(columnName) {
+  // TODO: лоадинг тоже можно прямо тут добавить. А ошибка - отдавать из апи, если есть.
   uniqueColumnValues.value = await fetchUniqueColumnValuesApi(columnName);
 }
 
@@ -153,65 +154,77 @@ function toggleFilter(columnHeading) {
     v-bind:loading="loading"
     v-on:update:options="loadItems"
   >
-    <template
-      v-for="(item, index) in ['surname', 'name', 'patronymic', 'email', 'phone', 'city']"
-      v-bind:key="index"
-      v-slot:[`header.${item}`]="{ column }"
-    >
-      {{ column.title }}
-      <v-btn
-        v-bind:id="column.key"
-        color="primary"
-        size="x-small"
-        v-on:click.stop="toggleFilter(column)"
-      >
-        <v-icon small> mdi-filter-variant </v-icon>
-      </v-btn>
+    <template v-slot:headers="{ columns, isSorted, getSortIcon, toggleSort }">
+      <tr>
+        <template
+          v-for="column in columns"
+          v-bind:key="column.key"
+        >
+          <td>
+            <div
+              class="mr-2 cursor-pointer"
+              @click="() => toggleSort(column)"
+            >
+              {{ column.title }}
+            </div>
+            <template v-if="isSorted(column)">
+              <v-icon v-bind:icon="getSortIcon(column)" />
+            </template>
+            <v-icon
+              v-if="column.filtrable"
+              v-bind:id="column.key"
+              v-on:click.stop="toggleFilter(column)"
+            >
+              mdi-filter
+            </v-icon>
 
-      <v-menu
-        v-bind:close-on-content-click="false"
-        v-bind:activator="`#${column.key}`"
-      >
-        <v-card>
-          <v-text-field
-            v-model="searchString"
-            v-bind:loading="loading"
-            density="compact"
-            variant="outlined"
-            label="Поиск"
-            append-inner-icon="mdi-magnify"
-            single-line
-            hide-details
-          ></v-text-field>
-          <!-- TODO: Тут бы лоадинг показывать, если значения ещё не подъехали -->
-          <v-list>
-            <v-list-item
-              v-for="searchedValue in searchedValues.slice(0, 4)"
-              v-bind:key="searchedValue"
+            <v-menu
+              v-bind:close-on-content-click="false"
+              v-bind:activator="`#${column.key}`"
             >
-              <label>
-                {{ searchedValue }}
-                <input
-                  v-model="checkedValues"
-                  type="checkbox"
-                  v-bind:value="searchedValue"
-                />
-              </label>
-            </v-list-item>
-          </v-list>
-          <!-- TODO: Строкой -->
-          <span>Выбранные значения для фильтрации: {{ checkedValues }}</span>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              variant="elevated"
-              v-on:click="clearFilters"
-            >
-              Очистить фильтры
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-menu>
+              <v-card>
+                <v-text-field
+                  v-model="searchString"
+                  v-bind:loading="loading"
+                  density="compact"
+                  variant="outlined"
+                  label="Поиск"
+                  append-inner-icon="mdi-magnify"
+                  single-line
+                  hide-details
+                ></v-text-field>
+                <!-- TODO: Тут бы лоадинг показывать, если значения ещё не подъехали -->
+                <v-list>
+                  <v-list-item
+                    v-for="searchedValue in searchedValues.slice(0, 4)"
+                    v-bind:key="searchedValue"
+                  >
+                    <label>
+                      {{ searchedValue }}
+                      <input
+                        v-model="checkedValues"
+                        type="checkbox"
+                        v-bind:value="searchedValue"
+                      />
+                    </label>
+                  </v-list-item>
+                </v-list>
+                <!-- TODO: Строкой -->
+                <span>Выбранные значения для фильтрации: {{ checkedValues }}</span>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn
+                    variant="elevated"
+                    v-on:click="clearFilters"
+                  >
+                    Очистить фильтры
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-menu>
+          </td>
+        </template>
+      </tr>
     </template>
 
     <template v-slot:top>
@@ -224,12 +237,17 @@ function toggleFilter(columnHeading) {
     <!-- Разобраться -->
     <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template v-slot:item.actions="{ item }">
-      <v-icon
-        size="small"
-        v-on:click="deleteItem(item)"
-      >
-        mdi-delete
-      </v-icon>
+      <v-tooltip text="Удалить запись">
+        <template v-slot:activator="{ props }">
+          <v-icon
+            size="small"
+            v-bind="props"
+            v-on:click="deleteItem(item)"
+          >
+            mdi-delete
+          </v-icon>
+        </template>
+      </v-tooltip>
     </template>
   </v-data-table-server>
 </template>
