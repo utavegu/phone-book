@@ -2,9 +2,11 @@
 // В Вуе работа с апи должна происходить в методах жизненного цикла (хотя это коллбэки...). Как в Нуксте - уточни ещё. Ну и скорее всего нужно бы фетч ещё в "юзАсинк" завернуть, чтобы запросы не дублировались. Ну и вообще через стор, по хорошему. Но раз Нукст, приоритетная задача - ССР
 // TODO: refactor (+ трай-кэтч... ну и файнали для лоадинга)
 // Файнали для лоадинга.
-import { baseUrl } from '..';
 import { getColumnValues } from '~/helpers/getColumnValues';
 import { getSortingType } from '~/helpers/getSortingType';
+
+const baseUrl = 'http://localhost:5000/api/';
+// По хорошему вот отсюда должно доставаться - useRuntimeConfig().public.apiBase). Но как его вынуть тут, а не в компоненте - не дожал.
 
 const fetchAbonentsApi = async (
   page: any,
@@ -14,7 +16,8 @@ const fetchAbonentsApi = async (
   checkedValues: any
 ): Promise<any> => {
   try {
-    const abonents = await $fetch(baseUrl + 'abonents', {
+    const abonents = await $fetch('abonents', {
+      baseURL: baseUrl,
       method: 'get',
       params: {
         page,
@@ -34,7 +37,8 @@ const fetchAbonentsApi = async (
 const fetchUniqueColumnValuesApi = async (selectedColumnName: any): Promise<any> => {
   try {
     // TODO: На сервере фортифицировать кейс с пустым селектедКолумн! (возникает при "очистить фильтры") (не делать запрос в базу, если строка пустая?)
-    const distinctedValues = await $fetch(`${baseUrl}abonents/column/${selectedColumnName}`, {
+    const distinctedValues = await $fetch(`abonents/column/${selectedColumnName}`, {
+      baseURL: baseUrl,
       method: 'get',
     });
 
@@ -46,7 +50,8 @@ const fetchUniqueColumnValuesApi = async (selectedColumnName: any): Promise<any>
 
 const deleteNoteApi = async (noteId: any): Promise<void> => {
   try {
-    await $fetch(`http://localhost:5000/api/abonents/${noteId}`, {
+    await $fetch(`abonents/${noteId}`, {
+      baseURL: baseUrl,
       method: 'delete',
     });
   } catch (err) {

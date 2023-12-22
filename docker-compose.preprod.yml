@@ -12,11 +12,7 @@ services:
 
   server:
     container_name: server-container
-    image: node:20.9.0-alpine3.18
-    user: "${UID}:${GID}"
-    working_dir: /server
-    volumes:
-      - ./server:/server
+    build: ./server
     ports:
       - $SERVER_EXTERNAL_PORT:$SERVER_INTERNAL_PORT
     environment:
@@ -28,40 +24,16 @@ services:
       - MONGODB_PASSWORD=$MONGODB_PASSWORD
       - DB_NAME=$DB_NAME
       - CLIENT_EXTERNAL_PORT=$CLIENT_EXTERNAL_PORT
-      - UID=$UID
-      - GID=$GID
-    command: [ "npm", "run", "start:dev" ]
     depends_on:
       - mongo
 
-  # mongo-admin-panel:
-  #   container_name: mongo-admin-panel-container
-  #   image: mongo-express
-  #   restart: always
-  #   ports:
-  #     - $MONGO_ADMIN_PANEL_EXTERNAL_PORT:$MONGO_ADMIN_PANEL_INTERNAL_PORT
-  #   environment:
-  #     ME_CONFIG_MONGODB_ADMINUSERNAME: $MONGODB_LOGIN
-  #     ME_CONFIG_MONGODB_ADMINPASSWORD: $MONGODB_PASSWORD
-  #     ME_CONFIG_MONGODB_URL: mongodb://$MONGODB_LOGIN:$MONGODB_PASSWORD@$MONGODB_SERVICE_NAME:$MONGODB_INTERNAL_PORT
-  #   depends_on:
-  #     - mongo
-  #     - server
-
   client:
     container_name: client-container
-    image: node:20.9.0-alpine3.18
-    user: "${UID}:${GID}"
-    working_dir: /client
-    volumes:
-      - ./client:/client
+    build: ./client
     ports:
       - $CLIENT_EXTERNAL_PORT:$CLIENT_INTERNAL_PORT
     environment:
-      - UID=$UID
-      - GID=$GID
       - NUXT_ENV_API_BASE_URL=$NUXT_ENV_API_BASE_URL
-    command: [ "npm", "run", "dev" ]
     depends_on:
       - mongo
       - server

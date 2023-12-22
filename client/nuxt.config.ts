@@ -20,9 +20,11 @@ export default defineNuxtConfig({
       ],
     },
   },
-  // publicRuntimeConfig: {
-  //   NUXT_ENV_API_BASE_URL: process.env.NUXT_ENV_API_BASE_URL
-  // },
+  runtimeConfig: {
+    public: {
+      apiBase: process.env.NUXT_ENV_API_BASE_URL,
+    },
+  },
   devtools: { enabled: false },
   typescript: {
     shim: false,
