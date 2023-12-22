@@ -2,7 +2,7 @@
 <script setup>
 import { ref, watch, computed } from 'vue';
 import { titles } from '@/data/titles';
-import { fetchAbonentsApi, fetchUniqueColumnValuesApi, deleteNoteApi } from '@/api/services/abonentsApi';
+import { fetchAbonentsApi, fetchUniqueColumnValuesApi } from '@/api/services/abonentsApi';
 
 const tableHeaders = ref(titles);
 const serverItems = ref([]); // вероятно должно быть компьютед-свойством (а то тут (по крайней мере в данный момент) много левого движа в компоненте происходит)
@@ -15,8 +15,8 @@ const searchString = ref('');
 const checkedValues = ref([]);
 const selectedColumnName = ref('');
 const deletedItemId = ref('');
-const isDialogDeleteOpen = ref(false);
-const isDialogCreateOpen = ref(false);
+const isDialogOpened = ref(false);
+const action = ref(''); // TODO: енумка
 
 const searchedValues = computed(() => {
   return uniqueColumnValues.value.filter((city) =>
@@ -25,7 +25,7 @@ const searchedValues = computed(() => {
 });
 
 watch(checkedValues, () => {
-  revalidateDataHandler.value = String(Date.now()); // Это походит на какой-то костыль, но именно так это рекомендуется делать в официальной документации к v-data-table-server
+  revalidateData();
 });
 
 watch(selectedColumnName, async (columnName) => {
@@ -36,10 +36,14 @@ watch(selectedColumnName, async (columnName) => {
   searchString.value = '';
 });
 
+function revalidateData() {
+  revalidateDataHandler.value = String(Date.now()); // Это походит на какой-то костыль, но именно так это рекомендуется делать в официальной документации к v-data-table-server
+}
+
 async function loadItems({ page, itemsPerPage, sortBy }) {
   loading.value = true;
   const abonents = await fetchAbonentsApi(page, itemsPerPage, sortBy, selectedColumnName.value, checkedValues.value);
-  // !!! findedAbonents (теряет их через раз) (следи так)
+  // !!! findedAbonents (теряет их через раз) (следи так, пообновляй страницу разиков 20 подряд и поконсоль значения)
   if (abonents) {
     serverItems.value = abonents.findedAbonents;
     totalItems.value = abonents.totalAbonents;
@@ -52,38 +56,29 @@ async function getUniqueColumnValues(columnName) {
   uniqueColumnValues.value = await fetchUniqueColumnValuesApi(columnName);
 }
 
-async function deleteNote(noteId) {
-  await deleteNoteApi(noteId);
-  revalidateDataHandler.value = String(Date.now());
-}
-
 function clearFilters() {
   checkedValues.value = [];
   selectedColumnName.value = '';
   searchString.value = '';
 }
 
+function openDialog() {
+  isDialogOpened.value = true;
+}
+
+function closeDialog() {
+  isDialogOpened.value = false;
+}
+
 function deleteItem(item) {
   deletedItemId.value = item._id;
-  isDialogDeleteOpen.value = true;
+  action.value = 'delete';
+  openDialog();
 }
 
-function closeDeleteDialog() {
-  isDialogDeleteOpen.value = false;
-}
-
-function deleteItemConfirm() {
-  deleteNote(deletedItemId.value);
-  deletedItemId.value = '';
-  closeDeleteDialog();
-}
-
-function openCreateFormModal() {
-  isDialogCreateOpen.value = true;
-}
-
-function closeCreateFormModal() {
-  isDialogCreateOpen.value = false;
+function createItem() {
+  action.value = 'create';
+  openDialog();
 }
 
 function toggleFilter(columnHeading) {
@@ -92,56 +87,21 @@ function toggleFilter(columnHeading) {
 </script>
 
 <template>
-  <!-- МОДАЛКА ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ (прокидывать пропсом). И сама пусть пропсы принимает. Чего алигн красный? Депрекейтед? -->
   <v-dialog
-    v-model="isDialogDeleteOpen"
-    max-width="300px"
+    v-model="isDialogOpened"
+    v-bind:max-width="action === 'delete' ? '300px' : '680px'"
   >
-    <v-card>
-      <v-card-title
-        class="text-h5"
-        align="center"
-        >Удалить эту запись?</v-card-title
-      >
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn
-          color="blue-darken-1"
-          variant="text"
-          v-on:click="closeDeleteDialog"
-          >Нет</v-btn
-        >
-        <v-btn
-          color="red-darken-1"
-          variant="text"
-          v-on:click="deleteItemConfirm"
-          >Да</v-btn
-        >
-        <v-spacer></v-spacer>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+    <cards-delete-note
+      v-if="action === 'delete'"
+      v-bind:deleted-item-id="deletedItemId"
+      v-on:close-dialog="closeDialog"
+      v-on:revalidate-data="revalidateData"
+    />
 
-  <!-- МОДАЛКА ДОБАВЛЕНИЯ ЗАПИСИ -->
-  <v-dialog
-    v-model="isDialogCreateOpen"
-    max-width="800px"
-  >
-    <v-card>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-icon
-          size="small"
-          v-on:click="closeCreateFormModal"
-        >
-          mdi-close
-        </v-icon>
-      </v-card-actions>
-      <v-card-title>
-        <span class="text-h5">{{ formTitle }}</span>
-      </v-card-title>
-      <vuetify-form />
-    </v-card>
+    <cards-create-note
+      v-if="action === 'create'"
+      v-on:close-dialog="closeDialog"
+    />
   </v-dialog>
 
   <v-data-table-server
@@ -163,7 +123,7 @@ function toggleFilter(columnHeading) {
           <td>
             <div
               class="mr-2 cursor-pointer"
-              @click="() => toggleSort(column)"
+              v-on:click="() => toggleSort(column)"
             >
               {{ column.title }}
             </div>
@@ -209,7 +169,7 @@ function toggleFilter(columnHeading) {
                     </label>
                   </v-list-item>
                 </v-list>
-                <!-- TODO: Строкой -->
+                <!-- TODO: Строкой и в столбик (<v-list>-<v-list-item>) - мапить -->
                 <span>Выбранные значения для фильтрации: {{ checkedValues }}</span>
                 <v-card-actions>
                   <v-spacer></v-spacer>
@@ -230,7 +190,7 @@ function toggleFilter(columnHeading) {
     <template v-slot:top>
       <table-toolbar
         title="Телефонный справочник"
-        v-on:open-create-form-modal="openCreateFormModal"
+        v-on:open-create-form-modal="createItem"
       />
     </template>
 
