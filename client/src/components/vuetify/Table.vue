@@ -193,7 +193,8 @@ function toggleFilter(columnHeading) {
                     <v-card-actions>
                       <v-spacer></v-spacer>
                       <v-btn
-                        variant="elevated"
+                        variant="outlined"
+                        color="blue-darken-1"
                         v-on:click="clearFilters"
                       >
                         Очистить фильтры
@@ -210,7 +211,7 @@ function toggleFilter(columnHeading) {
     </template>
 
     <template v-slot:top>
-      <table-toolbar
+      <vuetify-toolbar
         title="Телефонный справочник"
         v-on:open-create-form-modal="createItem"
       />

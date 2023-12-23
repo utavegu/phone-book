@@ -61,20 +61,21 @@ export default {
         v-show="isShowMenu"
         class="user-menu"
       >
-        <ui-button
+        <v-btn
           class="header-button button-enter"
           variant="outlined"
           @click="handleEnterButtonClick"
         >
           Войти
-        </ui-button>
-        <ui-button
+        </v-btn>
+        <v-btn
           class="header-button button-register"
-          variant="colored-accent"
+          variant="outlined"
+          color="blue-darken-1"
           @click="handleRegisterButtonClick"
         >
           Зарегистрироваться
-        </ui-button>
+        </v-btn>
       </div>
     </common-wrapper>
   </header>
@@ -224,10 +225,11 @@ export default {
   .user-menu {
     display: flex !important;
     flex-wrap: wrap;
+    flex-shrink: 0;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 0;
-    width: 293px;
+    column-gap: 10px;
   }
 
   .header-button {
@@ -238,8 +240,7 @@ export default {
   .button-enter {
     min-width: auto;
     margin-bottom: 0;
-    padding: 0;
-    border: none;
+    padding: 10px;
   }
 
   .button-register {

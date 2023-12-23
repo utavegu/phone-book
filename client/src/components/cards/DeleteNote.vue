@@ -28,7 +28,6 @@ function deleteItemConfirm() {
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn
-        color="blue-darken-1"
         variant="text"
         v-on:click="() => emit('close-dialog')"
         >Нет</v-btn

@@ -85,19 +85,28 @@ const submit = handleSubmit((values) => {
       v-bind:error-messages="flat.errorMessage.value"
       label="Квартира"
     />
-
-    <v-btn
-      class="me-4"
-      type="submit"
-    >
-      Отправить форму
-    </v-btn>
-
-    <v-btn
-      color="grey-lighten-3"
-      v-on:click="handleReset"
-    >
-      Очистить поля
-    </v-btn>
+    <v-container>
+      <v-row>
+        <v-col>
+          <v-btn
+            variant="outlined"
+            color="blue-darken-1"
+            type="submit"
+          >
+            Отправить форму
+          </v-btn>
+        </v-col>
+        <v-spacer />
+        <v-spacer />
+        <v-col>
+          <v-btn
+            variant="outlined"
+            v-on:click="handleReset"
+          >
+            Очистить поля
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-container>
   </form>
 </template>
