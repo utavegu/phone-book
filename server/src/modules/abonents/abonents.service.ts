@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// TODO: временно
 import { HttpException, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
@@ -8,7 +6,6 @@ import { IAbonentsService } from './typespaces/interfaces/IAbonentsService';
 import { Abonent, AbonentDocument } from './schemas/abonent.schema';
 import { CreateAbonentDto } from './typespaces/dto/create-abonent.dto';
 import { IQueryParams } from './typespaces/interfaces/IQueryParams';
-import { SortingOrders } from './typespaces/enums/sorting-orders.enum';
 
 @Injectable()
 export class AbonentsService implements IAbonentsService {
@@ -26,7 +23,7 @@ export class AbonentsService implements IAbonentsService {
   }
 
   async fetchAllAbonents({
-    itemsPerPage = '3', // TODO: пусть будет 5 (и на клиенте), но нужно будет расширить базу
+    itemsPerPage = '10',
     page = '1',
     sortingType,
     columnName,

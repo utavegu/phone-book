@@ -8,7 +8,7 @@ const { deletedItemId } = defineProps<{
 
 const emit = defineEmits(['close-dialog', 'revalidate-data']);
 
-async function deleteNote(noteId) {
+async function deleteNote(noteId: string) {
   await deleteNoteApi(noteId);
   emit('revalidate-data');
 }

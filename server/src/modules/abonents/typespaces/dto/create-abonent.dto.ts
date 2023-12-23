@@ -20,6 +20,7 @@ export class CreateAbonentDto {
 
   @IsString()
   @Length(2, 20)
+  @IsOptional()
   patronymic?: string;
 
   @IsPhoneNumber('RU')

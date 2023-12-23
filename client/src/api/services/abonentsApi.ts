@@ -23,7 +23,7 @@ const fetchAbonentsApi = async (
         page,
         itemsPerPage,
         sortingType: getSortingType(sortBy),
-        columnName: selectedColumnName, // TODO: Вот тут словарик прикрути, а принимай русскоязычные значения
+        columnName: selectedColumnName,
         columnValues: getColumnValues(checkedValues),
       },
     });

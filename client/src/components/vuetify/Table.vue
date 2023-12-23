@@ -17,6 +17,7 @@ const selectedColumnName = ref('');
 const deletedItemId = ref('');
 const isDialogOpened = ref(false);
 const action = ref(''); // TODO: енумка
+const columnValuesLoading = ref(true);
 
 const searchedValues = computed(() => {
   return uniqueColumnValues.value.filter((city) =>
@@ -43,7 +44,6 @@ function revalidateData() {
 async function loadItems({ page, itemsPerPage, sortBy }) {
   loading.value = true;
   const abonents = await fetchAbonentsApi(page, itemsPerPage, sortBy, selectedColumnName.value, checkedValues.value);
-  // !!! findedAbonents (теряет их через раз) (следи так, пообновляй страницу разиков 20 подряд и поконсоль значения)
   if (abonents) {
     serverItems.value = abonents.findedAbonents;
     totalItems.value = abonents.totalAbonents;
@@ -52,8 +52,9 @@ async function loadItems({ page, itemsPerPage, sortBy }) {
 }
 
 async function getUniqueColumnValues(columnName) {
-  // TODO: лоадинг тоже можно прямо тут добавить. А ошибка - отдавать из апи, если есть.
+  columnValuesLoading.value = true;
   uniqueColumnValues.value = await fetchUniqueColumnValuesApi(columnName);
+  columnValuesLoading.value = false;
 }
 
 function clearFilters() {
@@ -150,7 +151,7 @@ function toggleFilter(columnHeading) {
               <v-card>
                 <v-text-field
                   v-model="searchString"
-                  v-bind:loading="loading"
+                  v-bind:loading="columnValuesLoading"
                   density="compact"
                   variant="outlined"
                   label="Поиск"

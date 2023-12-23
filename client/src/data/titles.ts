@@ -11,14 +11,12 @@ export const titles = [
     sortable: true,
     filtrable: true,
   },
-  {
-    title: 'Отчество',
-    key: 'patronymic',
-    sortable: true,
-    filtrable: true,
-    // maxWidth: '50px', // хым..
-    // fixed: true,
-  },
+  // {
+  //   title: 'Отчество',
+  //   key: 'patronymic',
+  //   sortable: true,
+  //   filtrable: true,
+  // },
   {
     title: 'Почта',
     key: 'email',
@@ -47,14 +45,13 @@ export const titles = [
     title: 'Дом',
     key: 'house',
     sortable: true,
-    filtrable: true,
-    // minWidth: '300px',
+    filtrable: false,
   },
   {
     title: 'Квартира',
     key: 'flat',
     sortable: true,
-    filtrable: true,
+    filtrable: false,
   },
   {
     title: '',
