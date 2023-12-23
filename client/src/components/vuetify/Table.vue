@@ -1,13 +1,13 @@
-<!-- TODO: вернуть ts -->
 <script setup>
 import { ref, watch, computed } from 'vue';
-import { titles } from '@/data/titles';
 import { fetchAbonentsApi, fetchUniqueColumnValuesApi } from '@/api/services/abonentsApi';
+import { titles } from '@/data/titles';
+import { itemsPerPageVariants } from '@/data/itemsPerPageVariants';
 
 const tableHeaders = ref(titles);
-const serverItems = ref([]); // вероятно должно быть компьютед-свойством (а то тут (по крайней мере в данный момент) много левого движа в компоненте происходит)
+const serverItems = ref([]);
 const totalItems = ref(0);
-const itemsPerPage = ref(10);
+const itemsPerPage = ref(5);
 const loading = ref(true);
 const revalidateDataHandler = ref('');
 const uniqueColumnValues = ref([]);
@@ -16,8 +16,9 @@ const checkedValues = ref([]);
 const selectedColumnName = ref('');
 const deletedItemId = ref('');
 const isDialogOpened = ref(false);
-const action = ref(''); // TODO: енумка
+const action = ref('');
 const columnValuesLoading = ref(true);
+const itemsPerPageOptions = ref(itemsPerPageVariants);
 
 const searchedValues = computed(() => {
   return uniqueColumnValues.value.filter((city) =>
@@ -59,7 +60,6 @@ async function getUniqueColumnValues(columnName) {
 
 function clearFilters() {
   checkedValues.value = [];
-  selectedColumnName.value = '';
   searchString.value = '';
 }
 
@@ -112,12 +112,16 @@ function toggleFilter(columnHeading) {
 
   <v-data-table-server
     v-model:items-per-page="itemsPerPage"
+    v-model:items-per-page-options="itemsPerPageOptions"
+    items-per-page-text="Абонентов на странице:"
     item-value="name"
     v-bind:search="revalidateDataHandler"
     v-bind:headers="tableHeaders"
     v-bind:items-length="totalItems"
     v-bind:items="serverItems"
     v-bind:loading="loading"
+    loading-text="Данные загружаются..."
+    no-data-text="Данных нет"
     v-on:update:options="loadItems"
   >
     <template v-slot:headers="{ columns, isSorted, getSortIcon, toggleSort }">
@@ -149,43 +153,55 @@ function toggleFilter(columnHeading) {
               v-bind:activator="`#${column.key}`"
             >
               <v-card>
-                <v-text-field
-                  v-model="searchString"
-                  v-bind:loading="columnValuesLoading"
-                  density="compact"
-                  variant="outlined"
-                  label="Поиск"
-                  append-inner-icon="mdi-magnify"
-                  single-line
-                  hide-details
-                ></v-text-field>
-                <!-- TODO: Тут бы лоадинг показывать, если значения ещё не подъехали -->
-                <v-list>
-                  <v-list-item
-                    v-for="searchedValue in searchedValues.slice(0, 4)"
-                    v-bind:key="searchedValue"
-                  >
-                    <label>
-                      {{ searchedValue }}
-                      <input
+                <v-container v-if="!columnValuesLoading">
+                  <v-text-field
+                    v-model="searchString"
+                    v-bind:loading="columnValuesLoading"
+                    density="compact"
+                    variant="outlined"
+                    label="Поиск"
+                    append-inner-icon="mdi-magnify"
+                    single-line
+                    hide-details
+                  ></v-text-field>
+                  <v-list v-if="searchedValues.length">
+                    <v-list-item
+                      v-for="searchedValue in searchedValues.slice(0, 4)"
+                      v-bind:key="searchedValue"
+                    >
+                      <v-checkbox
                         v-model="checkedValues"
-                        type="checkbox"
+                        v-bind:label="searchedValue"
                         v-bind:value="searchedValue"
-                      />
-                    </label>
-                  </v-list-item>
-                </v-list>
-                <!-- TODO: Строкой и в столбик (<v-list>-<v-list-item>) - мапить -->
-                <span>Выбранные значения для фильтрации: {{ checkedValues }}</span>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn
-                    variant="elevated"
-                    v-on:click="clearFilters"
-                  >
-                    Очистить фильтры
-                  </v-btn>
-                </v-card-actions>
+                        density="compact"
+                        hide-details
+                      ></v-checkbox>
+                    </v-list-item>
+                  </v-list>
+                  <v-card-item v-else>Значения не найдены!</v-card-item>
+                  <v-container v-if="checkedValues.length">
+                    <v-divider />
+                    <v-card-subtitle>Выбранные фильтры:</v-card-subtitle>
+                    <v-list>
+                      <v-list-item
+                        v-for="checkedValue in checkedValues"
+                        v-bind:key="checkedValue"
+                      >
+                        {{ checkedValue }}
+                      </v-list-item>
+                    </v-list>
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn
+                        variant="elevated"
+                        v-on:click="clearFilters"
+                      >
+                        Очистить фильтры
+                      </v-btn>
+                    </v-card-actions>
+                  </v-container>
+                </v-container>
+                <v-progress-linear v-else />
               </v-card>
             </v-menu>
           </td>
@@ -200,7 +216,6 @@ function toggleFilter(columnHeading) {
       />
     </template>
 
-    <!-- Разобраться -->
     <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template v-slot:item.actions="{ item }">
       <v-tooltip text="Удалить запись">

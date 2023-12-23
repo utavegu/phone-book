@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import { deleteNoteApi } from '@/api/services/abonentsApi';
 
 const { deletedItemId } = defineProps<{

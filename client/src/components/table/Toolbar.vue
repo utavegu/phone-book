@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
-
 defineProps({
   title: {
     type: String,
@@ -13,21 +11,23 @@ const emit = defineEmits(['open-create-form-modal']);
 </script>
 
 <template>
-  <v-toolbar flat>
+  <v-toolbar
+    flat
+    color="blue-darken-1"
+  >
     <v-toolbar-title>{{ title }}</v-toolbar-title>
-    <v-spacer />
-    <v-divider
-      class="mx-4"
-      inset
-      vertical
-    />
-    <v-btn
-      color="primary"
-      dark
-      class="mb-2"
-      v-on:click="() => emit('open-create-form-modal')"
-    >
-      Добавить запись (ВЫРОВНЯТЬ ПО ВЫСОТЕ)
-    </v-btn>
+    <v-tooltip text="Добавить новую запись">
+      <template v-slot:activator="{ props }">
+        <v-btn icon>
+          <v-icon
+            size="large"
+            v-bind="props"
+            v-on:click="() => emit('open-create-form-modal')"
+          >
+            mdi-plus-thick
+          </v-icon>
+        </v-btn>
+      </template>
+    </v-tooltip>
   </v-toolbar>
 </template>

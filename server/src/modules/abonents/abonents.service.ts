@@ -23,7 +23,7 @@ export class AbonentsService implements IAbonentsService {
   }
 
   async fetchAllAbonents({
-    itemsPerPage = '10',
+    itemsPerPage = '5',
     page = '1',
     sortingType,
     columnName,
