@@ -12,4 +12,5 @@ export const VALIDATION_ERROR = {
   NUMBER_MIN_VALUE_1: 'Не меньше 1',
   NUMBER_MAX_VALUE_300: 'Не более 300',
   NUMBER_MAX_VALUE_5000: 'Не более 5000',
+  RU_TITLING: 'Только кириллица, первая буква заглавная, разрешены пробелы и дефисы',
 };

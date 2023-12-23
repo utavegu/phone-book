@@ -15,6 +15,6 @@ const emit = defineEmits(['close-dialog']);
         </v-icon>
       </v-btn>
     </v-card-actions>
-    <vuetify-form />
+    <slot></slot>
   </v-card>
 </template>

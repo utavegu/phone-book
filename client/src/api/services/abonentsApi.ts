@@ -59,4 +59,20 @@ const deleteNoteApi = async (noteId: any): Promise<void> => {
   }
 };
 
-export { fetchAbonentsApi, fetchUniqueColumnValuesApi, deleteNoteApi };
+const createAbonentApi = async (values: any): Promise<void> => {
+  try {
+    await $fetch(`abonents`, {
+      baseURL: baseUrl,
+      method: 'post',
+      body: {
+        ...values,
+        house: values.house && Number(values.house),
+        flat: values.flat && Number(values.flat),
+      },
+    });
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export { fetchAbonentsApi, fetchUniqueColumnValuesApi, deleteNoteApi, createAbonentApi };

@@ -101,7 +101,12 @@ function toggleFilter(columnHeading) {
     <cards-create-note
       v-if="action === 'create'"
       v-on:close-dialog="closeDialog"
-    />
+    >
+      <vuetify-form
+        v-on:close-dialog="closeDialog"
+        v-on:revalidate-data="revalidateData"
+      />
+    </cards-create-note>
   </v-dialog>
 
   <v-data-table-server

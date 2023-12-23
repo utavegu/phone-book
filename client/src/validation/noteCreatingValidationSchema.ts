@@ -29,12 +29,12 @@ export const noteCreatingValidationSchema = yup.object().shape({
     .matches(/^[A-Z0-9._%+-]+@[A-Z0-9-]+.+.[A-Z]{2,4}$/i, VALIDATION_ERROR.IS_EMAIL),
   city: yup
     .string()
-    .matches(/^[А-ЯЁ][а-яё]*$/, VALIDATION_ERROR.RU_NAMING)
+    .matches(/^[А-ЯЁ][\sа-яА-ЯЁё-]*$/, VALIDATION_ERROR.RU_TITLING)
     .min(2, VALIDATION_ERROR.MIN_2_CHAR)
     .max(50, VALIDATION_ERROR.MAX_50_CHAR),
   street: yup
     .string()
-    .matches(/^[А-ЯЁ][а-яё]*$/, VALIDATION_ERROR.RU_NAMING)
+    .matches(/^[А-ЯЁ][\sа-яА-ЯЁё-]*$/, VALIDATION_ERROR.RU_TITLING)
     .min(2, VALIDATION_ERROR.MIN_2_CHAR)
     .max(50, VALIDATION_ERROR.MAX_50_CHAR),
   house: yup

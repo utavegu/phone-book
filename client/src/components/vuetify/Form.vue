@@ -1,12 +1,15 @@
 <script setup>
 import { useField, useForm } from 'vee-validate';
 import { noteCreatingValidationSchema } from '@/validation/noteCreatingValidationSchema';
+import { createAbonentApi } from '@/api/services/abonentsApi';
+
+const emit = defineEmits(['close-dialog', 'revalidate-data']);
 
 const { handleSubmit, handleReset } = useForm({ validationSchema: noteCreatingValidationSchema });
 
 const surname = useField('surname');
 const name = useField('name');
-const patronymic = useField('patronymic');
+// const patronymic = useField('patronymic');
 const phone = useField('phone');
 const email = useField('email');
 const city = useField('city');
@@ -14,20 +17,11 @@ const street = useField('street');
 const house = useField('house');
 const flat = useField('flat');
 
-const submit = handleSubmit(async (values) => {
-  try {
-    await $fetch(`http://localhost:5000/api/abonents`, {
-      method: 'post',
-      body: {
-        ...values,
-        house: values.house && Number(values.house),
-        flat: values.flat && Number(values.flat),
-      },
-    });
-    handleReset();
-  } catch (err) {
-    // console.error(err);
-  }
+const submit = handleSubmit((values) => {
+  createAbonentApi(values);
+  handleReset();
+  emit('close-dialog');
+  emit('revalidate-data');
 });
 </script>
 
@@ -47,12 +41,12 @@ const submit = handleSubmit(async (values) => {
       label="Имя"
     />
 
-    <v-text-field
+    <!-- <v-text-field
       v-model="patronymic.value.value"
       v-bind:counter="20"
       v-bind:error-messages="patronymic.errorMessage.value"
       label="Отчество"
-    />
+    /> -->
 
     <v-text-field
       v-model="phone.value.value"
