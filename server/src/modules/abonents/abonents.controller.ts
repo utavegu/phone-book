@@ -11,6 +11,7 @@ import { AbonentsService } from './abonents.service';
 import { Abonent } from './schemas/abonent.schema';
 import { CreateAbonentDto } from './typespaces/dto/create-abonent.dto';
 import { IQueryParams } from './typespaces/interfaces/IQueryParams';
+import { ID } from './typespaces/types/id';
 
 @Controller('abonents')
 export class AbonentsController {
@@ -37,7 +38,7 @@ export class AbonentsController {
 
   // TODO: id validation pipe
   @Delete(':id')
-  deleteAbonent(@Param('id') id: number): Promise<void> {
+  deleteAbonent(@Param('id') id: ID): Promise<void> {
     return this.abonentsService.deleteAbonent(id);
   }
 }
