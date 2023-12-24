@@ -1,22 +1,19 @@
-// TODO: Типизация везде
-// В Вуе работа с апи должна происходить в методах жизненного цикла (хотя это коллбэки...). Как в Нуксте - уточни ещё. Ну и скорее всего нужно бы фетч ещё в "юзАсинк" завернуть, чтобы запросы не дублировались. Ну и вообще через стор, по хорошему. Но раз Нукст, приоритетная задача - ССР
-// TODO: refactor (+ трай-кэтч... ну и файнали для лоадинга)
-// Файнали для лоадинга.
 import { getColumnValues } from '~/helpers/getColumnValues';
 import { getSortingType } from '~/helpers/getSortingType';
+import type { IAbonent } from '~/typespaces/interfaces/IAbonent';
 
 const baseUrl = 'http://localhost:5000/api/';
 // По хорошему вот отсюда должно доставаться - useRuntimeConfig().public.apiBase). Но как его вынуть тут, а не в компоненте - не дожал.
 
 const fetchAbonentsApi = async (
-  page: any,
-  itemsPerPage: any,
+  page: number,
+  itemsPerPage: number,
   sortBy: any,
-  selectedColumnName: any,
-  checkedValues: any
-): Promise<any> => {
+  selectedColumnName: string,
+  checkedValues: string[]
+): Promise<IAbonent[] | void> => {
   try {
-    const abonents = await $fetch('abonents', {
+    const abonents = await $fetch<IAbonent[]>('abonents', {
       baseURL: baseUrl,
       method: 'get',
       params: {
@@ -34,10 +31,9 @@ const fetchAbonentsApi = async (
   }
 };
 
-const fetchUniqueColumnValuesApi = async (selectedColumnName: any): Promise<any> => {
+const fetchUniqueColumnValuesApi = async (selectedColumnName: string): Promise<string[] | void> => {
   try {
-    // TODO: На сервере фортифицировать кейс с пустым селектедКолумн! (возникает при "очистить фильтры") (не делать запрос в базу, если строка пустая?)
-    const distinctedValues = await $fetch(`abonents/column/${selectedColumnName}`, {
+    const distinctedValues = await $fetch<string[]>(`abonents/column/${selectedColumnName}`, {
       baseURL: baseUrl,
       method: 'get',
     });
@@ -48,7 +44,7 @@ const fetchUniqueColumnValuesApi = async (selectedColumnName: any): Promise<any>
   }
 };
 
-const deleteNoteApi = async (noteId: any): Promise<void> => {
+const deleteNoteApi = async (noteId: string): Promise<void> => {
   try {
     await $fetch(`abonents/${noteId}`, {
       baseURL: baseUrl,
@@ -59,7 +55,7 @@ const deleteNoteApi = async (noteId: any): Promise<void> => {
   }
 };
 
-const createAbonentApi = async (values: any): Promise<void> => {
+const createAbonentApi = async (values: Omit<IAbonent, '_id'>): Promise<IAbonent | void> => {
   try {
     await $fetch(`abonents`, {
       baseURL: baseUrl,

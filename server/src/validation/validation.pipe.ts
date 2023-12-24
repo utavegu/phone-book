@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/ban-types */
-// TODO: поправь типизацию, если успеешь
 import {
   PipeTransform,
   Injectable,

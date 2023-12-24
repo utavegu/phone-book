@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { AbonentsService } from './abonents.service';
 import { Abonent } from './schemas/abonent.schema';
+import { IdValidationPipe } from 'src/validation/id-validation.pipe';
 import { CreateAbonentDto } from './typespaces/dto/create-abonent.dto';
 import { IQueryParams } from './typespaces/interfaces/IQueryParams';
 import { ID } from './typespaces/types/id';
@@ -24,7 +25,7 @@ export class AbonentsController {
 
   @Get()
   fetchAllAbonents(
-    @Query() queryParams: IQueryParams, // TODO: Валидировать ли вас или перебор?
+    @Query() queryParams: IQueryParams,
   ): Promise<{ findedAbonents: Abonent[]; totalAbonents: number }> {
     return this.abonentsService.fetchAllAbonents(queryParams);
   }
@@ -36,9 +37,8 @@ export class AbonentsController {
     return this.abonentsService.getUniqueColumnValues(columnName);
   }
 
-  // TODO: id validation pipe
   @Delete(':id')
-  deleteAbonent(@Param('id') id: ID): Promise<void> {
+  deleteAbonent(@Param('id', IdValidationPipe) id: ID): Promise<void> {
     return this.abonentsService.deleteAbonent(id);
   }
 }
