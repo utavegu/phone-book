@@ -1,75 +1,81 @@
-# Nuxt 3 Minimal Starter
+## Инструкция по запуску проекта
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Для запуска проекта в системе должны быть установлены Docker и docker-compose.
 
-## Setup
+Сначала в корне проекта нужно создать файл .env и скопировать туда значения переменных из .env-example.
 
-Make sure to install the dependencies:
-
-```bash
-# npm
-npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
+Далее открыть терминал, находясь в корневой директории проекта, и ввести туда команду:
 
 ```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm run dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
+docker-compose -f docker-compose.preprod.yml up
 ```
 
-## Production
+После того как все контейнеры успешно запустятся, клиентская часть будет развёрнута на 3000 порту (http://localhost:3000). Зайдите туда и убедитесь, что всё работает.
 
-Build the application for production:
+В таблице будет отображаться сообщение "Данных нет".
 
+## Импортируем дамп базы данных
+
+1) Сохраните файл mongodb.dump, лежащий в корне проекта, в директорию на локальной машине.
+2) С помощью команды
 ```bash
-# npm
-npm run build
-
-# pnpm
-pnpm run build
-
-# yarn
-yarn build
-
-# bun
-bun run build
+docker ps
 ```
+убедитесь, что контейнер mongo-database-container запущен.
 
-Locally preview production build:
-
+3) Введите команду
 ```bash
-# npm
-npm run preview
+docker exec -i mongo-database-container /usr/bin/mongorestore --username root --password example --authenticationDatabase admin --nsInclude="phone-book.*" --archive < <YOUR_DIRECTORY>
+```
+чтобы перенести данные из дампа в базу данных контейнера.
 
-# pnpm
-pnpm run preview
+Где *<YOUR_DIRECTORY>* - путь до файла с дампом. Например:
+*~/Downloads/mongodb.dump*
 
-# yarn
-yarn preview
+После этого перезагрузите страницу браузера, чтобы увидеть загруженные данные.
 
-# bun
-bun run preview
+## Информация по зависимостям проекта
+
+Docker - 24.0.7
+
+docker-compose - 2.12.2
+
+node - 20.9.0
+
+npm - 10.1.0
+
+### Client:
+
+Проект развёрнут с помощью *npx nuxi@latest init*
+
+Nuxt - 3.8.2
+
+Vue - 3.3.10
+
+Vuetify - 3.4.7
+
+TypeScript - 5.3.3
+
+### Server:
+
+Проект развёрнут с помощью *nest new*
+
+NestJs - 10.2.1
+
+TypeScript - 5.1.3
+
+## Линтеры
+
+Для того, чтобы проверить код на ошибки, есть 2 объединенных скрипта.
+
+### Для сервера
+Включает в себя проверки Тайпскрипта, ES-lint, Prettier и unit-тесты. Для запуска, находясь в директории сервера, введите:
+```bash
+npm run all:check
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+### Для клиента
+Включает в себя проверки Тайпскрипта, ES-lint и Prettier. Для запуска, находясь в директории клиента, введите:
+```bash
+npm run all:check
+```
