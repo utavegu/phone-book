@@ -163,6 +163,7 @@ function toggleFilter(columnHeading) {
                     append-inner-icon="mdi-magnify"
                     single-line
                     hide-details
+                    autofocus
                   ></v-text-field>
                   <v-list v-if="searchedValues.length">
                     <v-list-item

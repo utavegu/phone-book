@@ -1,7 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { getFilters } from '../../../src/helpers/getFilters'; // При импорте из 'src/helpers/getFilters' тесты потеряют путь, потому так
+import { getFilters } from '../../helpers/getFilters'; // При импорте из 'src/helpers/getFilters' тесты потеряют путь, потому так
 import { IAbonentsService } from './typespaces/interfaces/IAbonentsService';
 import { Abonent, AbonentDocument } from './schemas/abonent.schema';
 import { CreateAbonentDto } from './typespaces/dto/create-abonent.dto';

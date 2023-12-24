@@ -2,6 +2,13 @@
 dist
 node_modules
 
+# Nuxt dev/build outputs
+client/.output
+client/.data
+client/.nuxt
+client/.nitro
+client/.cache
+
 # Logs
 logs
 *.log
@@ -11,8 +18,9 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
-# OS
+# Misc
 .DS_Store
+.fleet
 
 # Tests
 /coverage
@@ -34,4 +42,7 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
+# Local env files
 .env
+.env.*
+!.env.example
