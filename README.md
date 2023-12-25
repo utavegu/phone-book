@@ -16,16 +16,15 @@ docker-compose -f docker-compose.preprod.yml up
 
 ## Импортируем дамп базы данных
 
-1) Сохраните файл mongodb.dump, лежащий в корне проекта, в директорию на локальной машине.
-2) С помощью команды
+1) С помощью команды
 ```bash
 docker ps
 ```
 убедитесь, что контейнер mongo-database-container запущен.
 
-3) Введите команду
+2) Находясь в корневой директории проекта введите команду:
 ```bash
-docker exec -i mongo-database-container /usr/bin/mongorestore --username root --password example --authenticationDatabase admin --nsInclude="phone-book.*" --archive < <YOUR_DIRECTORY>
+docker exec -i mongo-database-container /usr/bin/mongorestore --username root --password example --authenticationDatabase admin --nsInclude="phone-book.*" --archive < ./mongodb.dump
 ```
 чтобы перенести данные из дампа в базу данных контейнера.
 
@@ -66,7 +65,7 @@ TypeScript - 5.1.3
 
 ## Линтеры
 
-Для того, чтобы проверить код на ошибки, есть 2 объединенных скрипта.
+Для того, чтобы проверить код на ошибки, есть 2 объединенных скрипта. Работать они будут только в dev-режиме, так как в препродакшн-сборку линтеры не устанавливаются.
 
 ### Для сервера
 Включает в себя проверки Тайпскрипта, ES-lint, Prettier и unit-тесты. Для запуска, находясь в директории сервера, введите:
